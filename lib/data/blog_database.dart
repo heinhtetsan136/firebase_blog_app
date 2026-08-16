@@ -1,26 +1,49 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_blog_app/data/blog_post_model.dart';
 
 class BlogDatabase {
-  final CollectionReference _firestore =
-      FirebaseFirestore.instance.collection(
-        "blog",
+  final CollectionReference<BlogPostModel>
+  _firestore = FirebaseFirestore.instance
+      .collection("blog")
+      .withConverter(
+        fromFirestore: ((snapshot, options) {
+          return BlogPostModel.fromJson(snapshot);
+        }),
+        toFirestore: (blogPost, options) {
+          return blogPost.toJson();
+        },
       );
-  final Stream<QuerySnapshot> _blogPostStream = FirebaseFirestore
-      .instance
-      .collection('blog')
-      .snapshots();
+  Future deletePost(String id) async {
+    try {
+      await _firestore.doc(id).delete();
+    } catch (e) {
+      return Future.error(e);
+    }
+  }
+
+  Future updatePost({
+    required String docId,
+    required BlogPostModel model
+  }) async {
+    try {
+      final dateTime =
+          DateTime.now().microsecondsSinceEpoch;
+      await _firestore.doc(docId).update(model.toJson());
+    } catch (e) {
+      return Future.error(e);
+    }
+  }
+
+  late final Stream<QuerySnapshot<BlogPostModel>> _blogPostStream =_firestore.snapshots()
+     ;
   Future<DocumentReference?> createBlogPost({
-    required String title,
-    required String description,
+    required BlogPostModel model
   }) async {
     try {
       final DateTime dateTime = DateTime.now();
-      final response = await _firestore.add({
-        "title": title,
-        "description": description,
-        "createdAt":
-            dateTime.microsecondsSinceEpoch,
-      });
+      final response = await _firestore.add(
+       model
+);
       return response;
     } catch (e) {
       Future.error(e);
@@ -28,7 +51,7 @@ class BlogDatabase {
     return null;
   }
 
-  Stream<QuerySnapshot> readBlog() {
+  Stream<QuerySnapshot<BlogPostModel>> readBlog() {
     try {
       return _blogPostStream;
     } catch (e) {

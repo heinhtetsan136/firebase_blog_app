@@ -2,16 +2,30 @@ import 'package:firebase_blog_app/data/blog_database.dart';
 import 'package:firebase_blog_app/data/blog_post_model.dart';
 import 'package:flutter/material.dart';
 
-class AddBlogPost extends StatefulWidget {
-  const AddBlogPost({super.key});
+class EditBlogPost extends StatefulWidget {
+  final String  id;
+  final BlogPostModel model;
+  const EditBlogPost({
+    super.key,
+    required this.id,
+   required this.model
+  });
 
   @override
-  State<AddBlogPost> createState() =>
-      _AddBlogPostState();
+  State<EditBlogPost> createState() =>
+      _EditBlogPostState();
 }
 
-class _AddBlogPostState
-    extends State<AddBlogPost> {
+class _EditBlogPostState
+    extends State<EditBlogPost> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    _titleController.text = widget.model.title ?? '';
+    _descriptionController.text = widget.model.description ?? '';
+    super.initState();
+  }
+
   final TextEditingController _titleController =
       TextEditingController();
   final TextEditingController
@@ -76,16 +90,29 @@ class _AddBlogPostState
                   _isLoading = true;
                 });
               }
-              await blogDatabase.createBlogPost(
-               model: BlogPostModel(
-                title: _titleController.text.trim(),
-                description: _descriptionController.text.trim(),
-                createdAt: DateTime.now().microsecondsSinceEpoch,)
+              await blogDatabase.updatePost(
+                docId: widget.id,
+                model: widget.model.copyWith(
+                  title: _titleController.text
+                      .trim(),
+                  description:
+                      _descriptionController.text
+                          .trim(),
+                  updatedAt: DateTime.now().microsecondsSinceEpoch
+
+                ),
               );
-              if(context.mounted){
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              if (context.mounted) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(
+                  SnackBar(
                     backgroundColor: Colors.grey,
-                    content: Text("Blog post created successfully")));
+                    content: Text(
+                      "Blog post updated successfully",
+                    ),
+                  ),
+                );
               }
             } catch (e) {
               if (context.mounted) {
@@ -95,7 +122,7 @@ class _AddBlogPostState
                   SnackBar(
                     backgroundColor: Colors.red,
                     content: Text(
-                      "Failed to Create Blog Post",
+                      "Failed to updated Blog Post",
                     ),
                   ),
                 );
@@ -104,10 +131,12 @@ class _AddBlogPostState
               setState(() {
                 _isLoading = false;
               });
-              Navigator.pop(context);
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
             }
           },
-          child: Text("Add Blog Post"),
+          child: Text("Updated Blog Post"),
         ),
         TextButton(
           onPressed: () {

@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_blog_app/data/blog_database.dart';
+import 'package:firebase_blog_app/data/blog_post_model.dart';
 import 'package:firebase_blog_app/screen/widget/add_blog_post.dart';
+import 'package:firebase_blog_app/screen/widget/edit_blog_Post.dart';
 import 'package:flutter/material.dart';
+
+import 'widget/blog_post_item.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -20,36 +24,28 @@ class _HomeState extends State<Home> {
         onPressed: _addBlogPostDialog,
       ),
       appBar: AppBar(title: Text("Blog App")),
-      body: StreamBuilder<QuerySnapshot>(
+      body: StreamBuilder<QuerySnapshot<BlogPostModel>>(
         stream: blogDatabase.readBlog(),
         builder: (_, snapshot) {
-          if(snapshot.hasData){
-            final data=snapshot.data?.docs;
-            return ListView.builder(itemBuilder: (_,i){
-              final Map blogDoc=data?[i].data() as Map;
+          if (snapshot.hasData) {
+            final data = snapshot.data?.docs;
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Card(
-
-                  elevation: 0,
-                  child: ListTile(
-                    title:Text(blogDoc["title"] ??""),
-                  subtitle: Text(blogDoc["description"] ??""),),
-                ),
-              );
-            },itemCount: data?.length,);
-
-          }
-          else if(snapshot.hasError){
-            return Center(
-              child:
-                Text("Something Wrong")
-              ,
+            return ListView.builder(
+              itemBuilder: (_, i) {
+                final BlogPostModel? blogDoc =
+                    data?[i].data() ;
+                final String? docId=data?[i].id;
+                if(docId==null||blogDoc==null) return SizedBox.shrink();
+                return BloPostItem(blogDoc: blogDoc,docId: docId,);
+              },
+              itemCount: data?.length,
             );
-          }
-          else{
-            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text("Something Wrong"),
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -64,4 +60,7 @@ class _HomeState extends State<Home> {
       },
     );
   }
+
 }
+
+
