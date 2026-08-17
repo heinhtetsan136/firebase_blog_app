@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_blog_app/data/blog_database.dart';
 import 'package:firebase_blog_app/data/blog_post_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddBlogPost extends StatefulWidget {
   const AddBlogPost({super.key});
@@ -19,10 +22,12 @@ class _AddBlogPostState
       TextEditingController();
   BlogDatabase blogDatabase = BlogDatabase();
   bool _isLoading = false;
+  Uint8List? _image;
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       content: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
@@ -43,8 +48,34 @@ class _AddBlogPostState
             ),
           ),
           SizedBox(height: 8),
+          if (_image == null)
+            IconButton(
+              onPressed: () async {
+                XFile? file = await _pickImage();
+
+                if (file != null) {
+                  _image = await file
+                      .readAsBytes();
+                }
+                 setState(() {
+
+                 });
+              },
+              icon: Icon(
+                Icons.image,
+                color: Colors.blueAccent,
+                size: 36,
+              ),
+            ),
+          if (_image != null)
+            Image.memory(
+              _image!,
+              width: 200,
+              height:200,
+              fit: BoxFit.cover,
+            ),
           if (_isLoading)
-            CircularProgressIndicator(),
+            Center(child: CircularProgressIndicator()),
         ],
       ),
       actions: [
@@ -77,15 +108,28 @@ class _AddBlogPostState
                 });
               }
               await blogDatabase.createBlogPost(
-               model: BlogPostModel(
-                title: _titleController.text.trim(),
-                description: _descriptionController.text.trim(),
-                createdAt: DateTime.now().microsecondsSinceEpoch,)
+                model: BlogPostModel(
+                  title: _titleController.text
+                      .trim(),
+                  description:
+                      _descriptionController.text
+                          .trim(),
+                  createdAt: DateTime.now()
+                      .microsecondsSinceEpoch,
+                  image: _image!=null ?Blob(_image!):null,
+                ),
               );
-              if(context.mounted){
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              if (context.mounted) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(
+                  SnackBar(
                     backgroundColor: Colors.grey,
-                    content: Text("Blog post created successfully")));
+                    content: Text(
+                      "Blog post created successfully",
+                    ),
+                  ),
+                );
               }
             } catch (e) {
               if (context.mounted) {
@@ -104,7 +148,9 @@ class _AddBlogPostState
               setState(() {
                 _isLoading = false;
               });
-              Navigator.pop(context);
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
             }
           },
           child: Text("Add Blog Post"),
@@ -116,6 +162,13 @@ class _AddBlogPostState
           child: Text("Cancel"),
         ),
       ],
+    );
+  }
+
+  Future<XFile?> _pickImage() async {
+    ImagePicker imagePicker = ImagePicker();
+    return await imagePicker.pickImage(
+      source: ImageSource.gallery,
     );
   }
 }

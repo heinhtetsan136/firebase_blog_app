@@ -104,6 +104,15 @@ class _BloPostItemState
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 8),
+              if(widget.blogDoc.image!=null)
+                Center(
+                  child: Image.memory(
+                    widget.blogDoc.image!.bytes,
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.cover,
+                  ),
+                ),
             ],
           ),
         ),
