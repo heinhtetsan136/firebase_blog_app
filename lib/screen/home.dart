@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_blog_app/data/blog_database.dart';
 import 'package:firebase_blog_app/data/blog_post_model.dart';
+import 'package:firebase_blog_app/data/google_login.dart';
 import 'package:firebase_blog_app/screen/widget/add_blog_post.dart';
 import 'package:firebase_blog_app/screen/widget/edit_blog_Post.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,11 @@ class _HomeState extends State<Home> {
       floatingActionButton: FloatingActionButton(
         onPressed: _addBlogPostDialog,
       ),
-      appBar: AppBar(title: Text("Blog App")),
+      appBar: AppBar(title: Text("Blog App"),actions: [
+        IconButton(onPressed: (){
+          signInWithGoogle();
+        }, icon: Icon(Icons.person))
+      ],),
       body: StreamBuilder<QuerySnapshot<BlogPostModel>>(
         stream: blogDatabase.readBlog(),
         builder: (_, snapshot) {

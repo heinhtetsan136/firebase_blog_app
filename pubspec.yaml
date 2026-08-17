@@ -37,6 +37,7 @@ dependencies:
   firebase_storage:
   firebase_core:
   firebase_auth:
+  google_sign_in:
   firebase_analytics:
   firebase_crashlytics:
   cloud_firestore:
