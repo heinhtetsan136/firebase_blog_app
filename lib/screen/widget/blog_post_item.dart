@@ -1,6 +1,7 @@
 import 'package:firebase_blog_app/data/blog_database.dart';
 import 'package:flutter/material.dart';
 
+
 import '../../data/blog_post_model.dart';
 import 'edit_blog_Post.dart';
 
@@ -24,7 +25,22 @@ class _BloPostItemState
   final BlogDatabase blogDatabase =
       BlogDatabase();
   @override
+  void dispose() {
+    // TODO: implement dispose
+
+    super.dispose();
+  }
+  @override
+  void initState() {
+
+
+
+    // TODO: implement initState
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
+
     final BlogPostModel model = widget.blogDoc;
     final MenuController menuController =
         MenuController();

@@ -17,3 +17,11 @@ Future<UserCredential> signInWithGoogle() async {
   return FirebaseAuth.instance
       .signInWithCredential(credential);
 }
+
+void listenAutState(
+  Function(User?) onChangeAuthState,
+) {
+  FirebaseAuth.instance.authStateChanges().listen(
+    onChangeAuthState,
+  );
+}

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_blog_app/data/blog_database.dart';
 import 'package:firebase_blog_app/data/blog_post_model.dart';
 import 'package:firebase_blog_app/data/google_login.dart';
@@ -18,42 +19,73 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final BlogDatabase blogDatabase =
       BlogDatabase();
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: _addBlogPostDialog,
       ),
-      appBar: AppBar(title: Text("Blog App"),actions: [
-        IconButton(onPressed: (){
-          signInWithGoogle();
-        }, icon: Icon(Icons.person))
-      ],),
-      body: StreamBuilder<QuerySnapshot<BlogPostModel>>(
-        stream: blogDatabase.readBlog(),
-        builder: (_, snapshot) {
-          if (snapshot.hasData) {
-            final data = snapshot.data?.docs;
-
-            return ListView.builder(
-              itemBuilder: (_, i) {
-                final BlogPostModel? blogDoc =
-                    data?[i].data() ;
-                final String? docId=data?[i].id;
-                if(docId==null||blogDoc==null) return SizedBox.shrink();
-                return BloPostItem(blogDoc: blogDoc,docId: docId,);
-              },
-              itemCount: data?.length,
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text("Something Wrong"),
-            );
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
+      appBar: AppBar(
+        title: Text("Blog App"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            icon: Icon(Icons.login_outlined),
+          ),
+        ],
       ),
+      body:
+          StreamBuilder<
+            QuerySnapshot<BlogPostModel>
+          >(
+            stream: blogDatabase.readBlog(),
+            builder: (_, snapshot) {
+              if (snapshot.hasData) {
+                final data = snapshot.data?.docs;
+
+                return ListView.builder(
+                  itemBuilder: (_, i) {
+                    final BlogPostModel? blogDoc =
+                        data?[i].data();
+                    final String? docId =
+                        data?[i].id;
+                    if (docId == null ||
+                        blogDoc == null)
+                      return SizedBox.shrink();
+                    return BloPostItem(
+                      blogDoc: blogDoc,
+                      docId: docId,
+                    );
+                  },
+                  itemCount: data?.length,
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text("Something Wrong"),
+                );
+              } else {
+                return Center(
+                  child:
+                      CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
     );
   }
 
@@ -65,7 +97,4 @@ class _HomeState extends State<Home> {
       },
     );
   }
-
 }
-
-
