@@ -3,7 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 Future<UserCredential> signInWithGoogle() async {
   await GoogleSignIn.instance.initialize(
-    clientId:
+    serverClientId:
         "354532996095-f7fo016lr77ki7kus71si2s1o7o1ao83.apps.googleusercontent.com",
   );
   final GoogleSignInAccount account =
